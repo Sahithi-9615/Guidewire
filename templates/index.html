@@ -1,0 +1,3826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Energy Analysis & Prediction</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --secondary: #ff006e;
+            --accent: #8338ec;
+            --dark: #0a0e27;
+            --darker: #050816;
+            --light: #f0f4f8;
+            --success: #06ffa5;
+            --warning: #ffbe0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--darker);
+        }
+        
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(131, 56, 236, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, -50px); }
+        }
+        
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+            padding: 0 2rem;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 250px 1fr auto;
+            gap: 3rem;
+            align-items: center;
+            padding: 0.8rem 0;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-tab {
+            padding: 0.6rem 1.2rem;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--light);
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .nav-tab:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(131, 56, 236, 0.1));
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+        
+        /* Logout Button */
+        .logout-button {
+            padding: 0.7rem 1.5rem;
+            background: rgba(255, 0, 110, 0.1);
+            border: 1px solid rgba(255, 0, 110, 0.3);
+            border-radius: 10px;
+            color: var(--secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .logout-button:hover {
+            background: rgba(255, 0, 110, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: calc(100vh - 150px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4rem;
+            padding: 2rem 0;
+        }
+        
+        .hero-content {
+            flex: 1;
+        }
+        
+        /* Welcome Message */
+        .welcome-message {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+            animation: slideUp 0.6s ease;
+        }
+        
+        .welcome-message i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+        
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideUp 0.8s ease 0.2s both;
+            letter-spacing: -1px;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            animation: slideUp 0.8s ease 0.3s both;
+        }
+        
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease 0.4s both;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 1rem 1.2rem;
+            background: rgba(0, 240, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: rgba(0, 240, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .feature-item i {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+        
+        .feature-item span {
+            font-size: 1rem;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1.2rem;
+            animation: slideUp 0.8s ease 0.5s both;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--darker);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 240, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        /* Thunder Symbol */
+        .hero-visual {
+            flex: 1;
+            position: relative;
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .energy-orbit-container {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: containerFloat 4s ease-in-out infinite;
+        }
+        
+        @keyframes containerFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .thunder-core {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(131, 56, 236, 0.6) 0%, rgba(0, 240, 255, 0.3) 40%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: coreGlow 3s ease-in-out infinite;
+            box-shadow: 0 0 80px rgba(0, 240, 255, 0.4), inset 0 0 60px rgba(131, 56, 236, 0.3);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+        }
+        
+        @keyframes coreGlow {
+            0%, 100% { 
+                box-shadow: 0 0 80px rgba(0, 240, 255, 0.4), inset 0 0 60px rgba(131, 56, 236, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 120px rgba(131, 56, 236, 0.6), inset 0 0 80px rgba(0, 240, 255, 0.4);
+                transform: scale(1.05);
+            }
+        }
+        
+        .thunder-icon {
+            font-size: 5.5rem;
+            background: linear-gradient(135deg, #4dd0e1 0%, #00bcd4 50%, #0097a7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: thunderPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.8));
+        }
+        
+        @keyframes thunderPulse {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.8));
+            }
+            50% { 
+                transform: scale(1.08) rotate(0deg);
+                filter: drop-shadow(0 0 40px rgba(131, 56, 236, 0.9));
+            }
+        }
+        
+        .orbit-ring {
+            position: absolute;
+            border: 1.5px solid rgba(0, 240, 255, 0.25);
+            border-radius: 50%;
+            animation: orbitRotate 20s linear infinite;
+        }
+        
+        .orbit-ring-1 {
+            width: 250px;
+            height: 250px;
+            animation-duration: 20s;
+        }
+        
+        .orbit-ring-2 {
+            width: 340px;
+            height: 340px;
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+        
+        @keyframes orbitRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .orbit-icon {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.8), rgba(0, 188, 212, 0.9));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+            animation: iconPulse 2s ease-in-out infinite;
+            border: 2px solid rgba(0, 240, 255, 0.4);
+        }
+        
+        @keyframes iconPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+            }
+            50% { 
+                transform: scale(1.15);
+                box-shadow: 0 0 35px rgba(0, 240, 255, 0.9);
+            }
+        }
+        
+        .orbit-ring-1 .orbit-icon:nth-child(1) {
+            top: -18px;
+            left: 50%;
+            margin-left: -18px;
+            animation-delay: 0s;
+        }
+        
+        .orbit-ring-1 .orbit-icon:nth-child(2) {
+            top: 50%;
+            right: -18px;
+            margin-top: -18px;
+            animation-delay: 0.5s;
+        }
+        
+        .orbit-ring-1 .orbit-icon:nth-child(3) {
+            bottom: -18px;
+            left: 50%;
+            margin-left: -18px;
+            animation-delay: 1s;
+        }
+        
+        .orbit-ring-1 .orbit-icon:nth-child(4) {
+            top: 50%;
+            left: -18px;
+            margin-top: -18px;
+            animation-delay: 1.5s;
+        }
+        
+        .orbit-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary);
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes dotPulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(1) {
+            top: -4px;
+            left: 50%;
+            margin-left: -4px;
+            animation-delay: 0s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(2) {
+            top: 15%;
+            right: 15%;
+            animation-delay: 0.25s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(3) {
+            top: 50%;
+            right: -4px;
+            margin-top: -4px;
+            animation-delay: 0.5s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(4) {
+            bottom: 15%;
+            right: 15%;
+            animation-delay: 0.75s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(5) {
+            bottom: -4px;
+            left: 50%;
+            margin-left: -4px;
+            animation-delay: 1s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(6) {
+            bottom: 15%;
+            left: 15%;
+            animation-delay: 1.25s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(7) {
+            top: 50%;
+            left: -4px;
+            margin-top: -4px;
+            animation-delay: 1.5s;
+        }
+        
+        .orbit-ring-2 .orbit-dot:nth-child(8) {
+            top: 15%;
+            left: 15%;
+            animation-delay: 1.75s;
+        }
+        
+        /* Robot Assistant */
+        .robot-assistant {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: robotHover 3s ease-in-out infinite;
+        }
+        
+        .robot-assistant:hover {
+            transform: scale(1.15);
+        }
+        
+        @keyframes robotHover {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .robot-circle {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 30px rgba(0, 240, 255, 0.5);
+            animation: circlePulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes circlePulse {
+            0%, 100% { box-shadow: 0 8px 30px rgba(0, 240, 255, 0.5); }
+            50% { box-shadow: 0 8px 40px rgba(131, 56, 236, 0.7); }
+        }
+        
+        .robot-circle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            animation: ripple 2s ease-out infinite;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        .robot-icon {
+            font-size: 2.5rem;
+            z-index: 1;
+        }
+        
+        .robot-tooltip {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .robot-assistant:hover .robot-tooltip {
+            opacity: 1;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+        }
+
+        /* Prediction Tab Styles */
+        .prediction-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .form-card, .results-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .method-btn {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 12px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .method-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .method-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(131, 56, 236, 0.2));
+            border-color: var(--primary);
+        }
+
+        .file-upload-section {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .results-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .results-placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .result-value {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+        }
+
+        .result-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.3rem;
+        }
+
+        .recommendations {
+            width: 100%;
+            background: rgba(6, 255, 165, 0.05);
+            border: 1px solid rgba(6, 255, 165, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .recommendation-item {
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Chat Styles */
+        .chatbot-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .chat-window {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-messages {
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            max-width: 70%;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .message.user .message-content {
+            background: rgba(131, 56, 236, 0.2);
+            border-color: rgba(131, 56, 236, 0.3);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .btn-voice {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-voice:hover {
+            background: rgba(0, 240, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .btn-voice.active {
+            background: rgba(255, 0, 110, 0.2);
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-voice.speaking {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 240, 255, 0.8);
+            }
+        }
+
+        .voice-indicator {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            display: none;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .chart-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-title {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* About Styles */
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .about-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .about-title {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .about-text {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .tech-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+        }
+
+        .tech-item i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Guide Styles */
+        .guide-steps {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            display: flex;
+            gap: 2rem;
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateX(10px);
+            border-color: var(--primary);
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--darker);
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* Reviews Styles */
+        .review-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .review-form {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 3rem;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .star {
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .star:hover, .star.active {
+            color: #ffbe0b;
+            transform: scale(1.2);
+        }
+
+        .reviews-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .review-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .review-author {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .review-rating {
+            color: #ffbe0b;
+            font-size: 1.2rem;
+        }
+
+        .review-card p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .error-message {
+            color: var(--secondary);
+            padding: 1rem;
+            background: rgba(255, 0, 110, 0.1);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 240, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .nav-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .nav-tabs {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .energy-orbit-container {
+                width: 300px;
+                height: 300px;
+            }
+        }
+        /* ==================== USER PROFILE STYLES ==================== */
+.user-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+    background: rgba(0, 240, 255, 0.1);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--darker);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--light);
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 280px;
+    background: rgba(10, 14, 39, 0.98);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    display: none;
+    z-index: 1001;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+}
+
+.profile-dropdown.active {
+    display: block;
+    animation: dropdownFade 0.3s ease;
+}
+
+@keyframes dropdownFade {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-header {
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    margin-bottom: 1rem;
+}
+
+.profile-header .user-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+    margin: 0 auto 0.5rem;
+}
+
+.profile-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.profile-stat-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.profile-stat-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.profile-actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-action-btn {
+    padding: 0.7rem;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 8px;
+    color: var(--light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.profile-action-btn:hover {
+    background: rgba(0, 240, 255, 0.2);
+    transform: translateX(5px);
+}
+
+/* ==================== DASHBOARD ENHANCEMENTS ==================== */
+.stat-card {
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-icon.primary {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 240, 255, 0.1));
+    color: var(--primary);
+}
+
+.stat-icon.success {
+    background: linear-gradient(135deg, rgba(6, 255, 165, 0.2), rgba(6, 255, 165, 0.1));
+    color: var(--success);
+}
+
+.stat-icon.warning {
+    background: linear-gradient(135deg, rgba(255, 190, 11, 0.2), rgba(255, 190, 11, 0.1));
+    color: var(--warning);
+}
+
+.stat-icon.accent {
+    background: linear-gradient(135deg, rgba(131, 56, 236, 0.2), rgba(131, 56, 236, 0.1));
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--light);
+    margin-bottom: 0.3rem;
+}
+
+.stat-change {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.stat-change.positive { color: var(--success); }
+.stat-change.negative { color: var(--secondary); }
+.stat-change.neutral { color: rgba(255, 255, 255, 0.6); }
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.history-table th {
+    background: rgba(0, 240, 255, 0.1);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--primary);
+    border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+}
+
+.history-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.history-table tr:hover {
+    background: rgba(0, 240, 255, 0.05);
+}
+
+.usage-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.usage-badge.high {
+    background: rgba(255, 0, 110, 0.2);
+    color: var(--secondary);
+    border: 1px solid rgba(255, 0, 110, 0.3);
+}
+
+.usage-badge.normal {
+    background: rgba(6, 255, 165, 0.2);
+    color: var(--success);
+    border: 1px solid rgba(6, 255, 165, 0.3);
+}
+
+.trend-chart-container {
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.chart-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.chart-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: rgba(0, 240, 255, 0.3);
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+}
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+                <span>Smart Energy AI</span>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('home')">
+                    <i class="fas fa-home"></i> Home
+                </button>
+                <button class="nav-tab" onclick="showTab('prediction')">
+                    <i class="fas fa-chart-line"></i> Prediction
+                </button>
+                <button class="nav-tab" onclick="showTab('chat')">
+                    <i class="fas fa-comments"></i> AI Chat
+                </button>
+                <button class="nav-tab" onclick="showTab('dashboard')">
+                    <i class="fas fa-chart-bar"></i> Dashboard
+                </button>
+                <button class="nav-tab" onclick="showTab('about')">
+                    <i class="fas fa-info-circle"></i> About
+                </button>
+                <button class="nav-tab" onclick="showTab('guide')">
+                    <i class="fas fa-book"></i> Guide
+                </button>
+                <button class="nav-tab" onclick="showTab('reviews')">
+                    <i class="fas fa-star"></i> Reviews
+                </button>
+            </div>
+            
+            <!-- Replace the logout button section with this -->
+<div class="user-profile" onclick="toggleProfileDropdown()">
+    <div class="user-avatar" id="userAvatar">U</div>
+    <div class="user-info">
+        <div class="user-name" id="userName">{{ username }}</div>
+        <div class="user-role">Member</div>
+    </div>
+    <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+    
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-header">
+            <div class="user-avatar" id="profileAvatar">U</div>
+            <div class="user-name" id="profileName" style="margin-top: 0.5rem;">{{ username }}</div>
+            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;" id="profileEmail">
+                email@example.com
+            </div>
+        </div>
+        
+        <div style="margin: 1rem 0;">
+            <div class="profile-stat">
+                <span class="profile-stat-label">Member Since</span>
+                <span class="profile-stat-value" id="memberSince">-</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-label">Total Predictions</span>
+                <span class="profile-stat-value" id="totalPredictions">0</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-label">Avg Consumption</span>
+                <span class="profile-stat-value" id="avgConsumption">0 kWh</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-label">Avg Efficiency</span>
+                <span class="profile-stat-value" id="avgEfficiency">0%</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button onclick="logout()" class="profile-action-btn" style="background: rgba(255, 0, 110, 0.1); border-color: rgba(255, 0, 110, 0.3); border: none; cursor: pointer; font-family: inherit; width: 100%;">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Logout</span>
+</button>
+        </div>
+    </div>
+</div>
+        </div>
+    </nav>
+    
+    <!-- Home Tab -->
+    <div id="home" class="tab-content active">
+        <div class="container">
+            <div class="hero">
+                <div class="hero-content">
+                    <div class="welcome-message">
+                        <i class="fas fa-user-circle"></i>
+                        Welcome, <strong>{{ username }}</strong>!
+                    </div>
+                    <h1 class="hero-title">Smart Energy Analysis & Prediction</h1>
+                    <p class="hero-subtitle">
+                        Harness the power of Machine Learning to predict energy consumption, 
+                        optimize usage, and reduce costs with device-level insights.
+                    </p>
+                    
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <i class="fas fa-brain"></i>
+                            <span>AI-Powered Predictions</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Real-time Analytics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-leaf"></i>
+                            <span>Energy Optimization</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Smart Recommendations</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cta-buttons">
+                        <button class="btn btn-primary" onclick="showTab('prediction')">
+                            <i class="fas fa-rocket"></i>
+                            Get Started
+                        </button>
+                        <button class="btn btn-secondary" onclick="showTab('guide')">
+                            <i class="fas fa-play"></i>
+                            Watch Demo
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Thunder Symbol Visualization -->
+                <div class="hero-visual">
+                    <div class="energy-orbit-container">
+                        <div class="thunder-core">
+                            <div class="thunder-icon">⚡</div>
+                        </div>
+                        
+                        <div class="orbit-ring orbit-ring-1">
+                            <div class="orbit-icon">💡</div>
+                            <div class="orbit-icon">🔌</div>
+                            <div class="orbit-icon">☀️</div>
+                            <div class="orbit-icon">🌍</div>
+                        </div>
+                        
+                        <div class="orbit-ring orbit-ring-2">
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                            <div class="orbit-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Prediction Tab -->
+    <div id="prediction" class="tab-content">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Energy Consumption Prediction</h2>
+                <p class="section-description">
+                    Enter your parameters to get accurate predictions and personalized recommendations
+                </p>
+            </div>
+            
+            <div class="prediction-container">
+                <div class="form-card">
+                    <!-- Method Selector -->
+                    <div class="method-selector">
+                        <button type="button" class="method-btn active" id="manualMethodBtn" onclick="switchMethod('manual')">
+                            ✏️ Manual Entry
+                        </button>
+                        <button type="button" class="method-btn" id="fileMethodBtn" onclick="switchMethod('file')">
+                            📁 Upload File
+                        </button>
+                    </div>
+                    
+                    <!-- File Upload Section -->
+                    <div class="file-upload-section" id="fileUploadSection" style="display: none;">
+                        <h4>
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Upload Energy Data File
+                        </h4>
+                        <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                            Supported formats: PDF, TXT, DOC, DOCX, CSV (Max 16MB)
+                        </p>
+                        <input type="file" id="dataFile" accept=".pdf,.txt,.doc,.docx,.csv" style="display: none;">
+                        <button type="button" onclick="document.getElementById('dataFile').click()" class="btn btn-secondary" style="margin-right: 1rem;">
+                            <i class="fas fa-file-upload"></i> Choose File
+                        </button>
+                        <button type="button" onclick="uploadAndExtract()" class="btn btn-primary">
+                            <i class="fas fa-magic"></i> Upload & Extract Data
+                        </button>
+                        <p id="fileName" style="margin-top: 1rem; color: var(--success); font-size: 0.9rem;"></p>
+                        <div id="uploadLoading" style="display: none; margin-top: 1.5rem; text-align: center; padding: 2rem; background: rgba(0,0,0,0.3); border-radius: 12px;">
+                            <div class="spinner"></div>
+                            <p style="color: var(--primary); margin-top: 1rem; font-size: 1.1rem; font-weight: 600;">
+                                🤖 Processing your request...
+                            </p>
+                            <p style="color: rgba(255,255,255,0.6); margin-top: 0.5rem; font-size: 0.9rem;">
+                                Extracting data from file using AI
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Form Section -->
+                    <div id="manualFormSection">
+                        <h3 style="color: var(--primary); margin-bottom: 1.5rem;">Input Parameters</h3>
+                        <form id="predictionForm">
+                            <div class="form-group">
+                                <label class="form-label">Date & Time</label>
+                                <input type="datetime-local" class="form-input" id="timestamp" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Temperature (°C)</label>
+                                    <input type="number" class="form-input" id="temperature" placeholder="e.g., 25" step="0.1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Humidity (%)</label>
+                                    <input type="number" class="form-input" id="humidity" placeholder="e.g., 50" step="0.1" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Square Footage</label>
+                                    <input type="number" class="form-input" id="squareFootage" placeholder="e.g., 1500" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Occupancy</label>
+                                    <input type="number" class="form-input" id="occupancy" placeholder="e.g., 4" min="1" max="10" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Renewable Energy (kWh)</label>
+                                <input type="number" class="form-input" id="renewableEnergy" placeholder="e.g., 10" step="0.1" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">HVAC Usage</label>
+                                    <select class="form-select" id="hvacUsage" required>
+                                        <option value="">Select...</option>
+                                        <option value="On">On</option>
+                                        <option value="Off">Off</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Lighting Usage</label>
+                                    <select class="form-select" id="lightingUsage" required>
+                                        <option value="">Select...</option>
+                                        <option value="On">On</option>
+                                        <option value="Off">Off</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Holiday</label>
+                                <select class="form-select" id="holiday" required>
+                                    <option value="">Select...</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                                <i class="fas fa-magic"></i>
+                                Predict Energy Consumption
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="results-card" id="resultsCard">
+                    <i class="fas fa-chart-line" style="font-size: 4rem; color: rgba(0, 240, 255, 0.3); margin-bottom: 1rem;"></i>
+                    <p class="results-placeholder">
+                        Your prediction results will appear here
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Tab -->
+    <div id="chat" class="tab-content">
+        <div class="container">
+            <div class="chatbot-container">
+                <div class="section-header">
+                    <h2 class="section-title">AI Energy Assistant</h2>
+                    <p class="section-description">
+                        Chat with our AI to get personalized energy predictions
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <div class="chart-subtitle">Chat History Enabled</div>
+    <button onclick="clearChatHistory()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+        <i class="fas fa-trash"></i> Clear History
+    </button>
+</div>
+                
+                <div class="chat-window">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                Hello! I'm your Smart Energy AI Assistant. I can help you predict energy consumption. Would you like to start? Just say "yes" or "calculate energy"!
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <button class="btn btn-voice" id="speakerButton" onclick="toggleAutoSpeak()" title="Toggle Auto-speak responses">
+                            <i class="fas fa-volume-up" id="speakerIcon"></i>
+                        </button>
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Type or speak your message...">
+                        <button class="btn btn-voice" id="micButton" onclick="toggleSpeechRecognition()" title="Voice Input (Click to speak)">
+                            <i class="fas fa-microphone" id="micIcon"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="voice-indicator"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Energy Analytics Dashboard</h2>
+            <p class="section-description">
+                Comprehensive analysis of your energy consumption patterns
+            </p>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-label">Total Predictions</div>
+                <div class="stat-value" id="dashTotalPredictions">0</div>
+                <div class="stat-change neutral" id="dashPredictionChange">
+                    <i class="fas fa-minus"></i>
+                    <span>No data yet</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="stat-label">Avg Consumption</div>
+                <div class="stat-value" id="dashAvgConsumption">0 <small style="font-size: 0.5em;">kWh</small></div>
+                <div class="stat-change neutral" id="dashConsumptionTrend">
+                    <i class="fas fa-minus"></i>
+                    <span>Stable</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="stat-label">Avg Efficiency</div>
+                <div class="stat-value" id="dashAvgEfficiency">0<small style="font-size: 0.5em;">%</small></div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Good performance</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon accent">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-label">High Usage Events</div>
+                <div class="stat-value" id="dashHighUsage">0</div>
+                <div class="stat-change" id="dashHighUsagePercent">
+                    <span>0% of total</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consumption Trend Chart -->
+        <div class="trend-chart-container">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Consumption Trend</div>
+                    <div class="chart-subtitle">Last 10 predictions</div>
+                </div>
+            </div>
+            <div style="position: relative; height: 300px;">
+    <canvas id="consumptionTrendChart"></canvas>
+</div>
+        </div>
+        
+        <!-- Recent Predictions History -->
+        <div class="trend-chart-container">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Recent Prediction History</div>
+                    <div class="chart-subtitle">Your latest energy predictions</div>
+                </div>
+            </div>
+            
+            <div id="predictionHistoryContainer">
+                <div class="empty-state">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>No Predictions Yet</h3>
+                    <p>Start making predictions to see your history here</p>
+                    <button class="btn btn-primary" onclick="showTab('prediction')">
+                        <i class="fas fa-plus"></i>
+                        Make Your First Prediction
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add this after the dashboard-grid div -->
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+    <button class="btn btn-primary" onclick="downloadReport()" id="downloadReportBtn">
+        <i class="fas fa-download"></i>
+        Download PDF Report
+    </button>
+    <button class="btn btn-secondary" onclick="emailReport()" id="emailReportBtn">
+        <i class="fas fa-envelope"></i>
+        Email Report to Me
+    </button>
+</div>
+    </div>
+</div>
+    
+   <!-- About Tab -->
+<!-- About Tab -->
+<div id="about" class="tab-content">
+    <div class="container">
+        <div class="about-content">
+            <div class="section-header">
+                <h2 class="section-title">About This Project</h2>
+            </div>
+            
+            <div class="about-card">
+                <h3 class="about-title">What We Do</h3>
+                <p class="about-text">
+                    Smart Energy AI uses machine learning and artificial intelligence to predict 
+                    energy consumption patterns with high accuracy. Our platform analyzes temperature, 
+                    occupancy, HVAC usage, and other factors to provide actionable insights for 
+                    optimizing energy usage and reducing costs.
+                </p>
+            </div>
+            
+            <div class="about-card">
+                <h3 class="about-title">Key Features</h3>
+                <p class="about-text">
+                    🎯 ML-powered predictions with 95% accuracy<br><br>
+                    🤖 AI chatbot with voice support<br><br>
+                    📄 PDF and document analysis<br><br>
+                    📊 Real-time analytics dashboard<br><br>
+                    💡 Personalized recommendations<br><br>
+                    📧 Downloadable energy reports
+                </p>
+            </div>
+            
+            <div class="about-card">
+                <h3 class="about-title">Technology Stack</h3>
+                <div class="tech-stack" style="grid-template-columns: repeat(3, 1fr); max-width: 700px; margin: 0 auto;">
+                    <div class="tech-item">
+                        <i class="fab fa-python"></i>
+                        <div>Python</div>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-brain"></i>
+                        <div>Machine Learning</div>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-robot"></i>
+                        <div>AI (Groq/Gemini)</div>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-database"></i>
+                        <div>MongoDB</div>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-flask"></i>
+                        <div>Flask</div>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>Chart.js</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <!-- Guide Tab -->
+    <div id="guide" class="tab-content">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How to Use This Platform</h2>
+                <p class="section-description">
+                    Follow these simple steps to get started
+                </p>
+            </div>
+            
+            <div class="guide-steps">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Navigate to Prediction Tab</h3>
+                        <p>Click on the "Prediction" tab to access the prediction interface.</p>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Enter Your Data</h3>
+                        <p>Fill in all required fields including temperature, humidity, occupancy, and device usage.</p>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Predictions</h3>
+                        <p>Click "Predict" to receive instant predictions with recommendations.</p>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Use AI Chatbot</h3>
+                        <p>Visit AI Chat tab for a conversational prediction experience.</p>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>Analyze Dashboard</h3>
+                        <p>View comprehensive analytics in the Dashboard tab.</p>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h3>Share Feedback</h3>
+                        <p>Help us improve by sharing your experience in Reviews!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviews Tab -->
+    <div id="reviews" class="tab-content">
+        <div class="container">
+            <div class="review-container">
+                <div class="section-header">
+                    <h2 class="section-title">User Reviews</h2>
+                    <p class="section-description">
+                        Share your experience with our platform
+                    </p>
+                </div>
+                
+                <div class="review-form">
+                    <h3 style="color: var(--primary); margin-bottom: 1.5rem;">Leave a Review</h3>
+                    <form id="reviewForm">
+                        <div class="form-group">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" class="form-input" id="reviewName" placeholder="John Doe" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Rating</label>
+                            <div class="rating-stars" id="ratingStars">
+                                <span class="star" data-rating="1">★</span>
+                                <span class="star" data-rating="2">★</span>
+                                <span class="star" data-rating="3">★</span>
+                                <span class="star" data-rating="4">★</span>
+                                <span class="star" data-rating="5">★</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Your Review</label>
+                            <textarea class="form-input" id="reviewComment" rows="4" placeholder="Share your thoughts..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i>
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="reviews-list" id="reviewsList">
+                    <!-- Reviews will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Robot Assistant -->
+    <div class="robot-assistant" onclick="showTab('chat')">
+        <div class="robot-circle">
+            <span class="robot-icon">🤖</span>
+        </div>
+        <div class="robot-tooltip">Need help? Chat with me!</div>
+    </div>
+    
+    <script>
+        // ==================== JWT AUTHENTICATION ====================
+function checkAuth() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        window.location.href = '/login-page';
+        return false;
+    }
+    return true;
+}
+
+async function authenticatedFetch(url, options = {}) {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        window.location.href = '/login-page';
+        throw new Error('Not authenticated');
+    }
+    
+    const headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+    };
+    
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+    
+    if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('user_name');
+        window.location.href = '/login-page';
+        throw new Error('Session expired');
+    }
+    
+    return response;
+}
+
+async function logout() {
+    try {
+        await authenticatedFetch('/logout', { method: 'POST' });
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('user_name');
+        window.location.href = '/login-page';
+    }
+}
+        // Global variables
+        let accumulatedParams = {};
+        let currentRating = 5;
+        let chatState = {
+            mode: 'conversation',
+            collectingData: false,
+            step: 0,
+            data: {}
+        };
+        
+        const predictionSteps = [
+            { key: 'Temperature', question: 'Great! Let\'s start. What is the current temperature in Celsius? (e.g., 25)', type: 'number' },
+            { key: 'Humidity', question: 'Perfect! Now, what is the humidity percentage? (e.g., 50)', type: 'number' },
+            { key: 'SquareFootage', question: 'Thanks! What is the square footage? (e.g., 1500)', type: 'number' },
+            { key: 'Occupancy', question: 'Got it! How many people are present? (1-10)', type: 'number' },
+            { key: 'RenewableEnergy', question: 'Excellent! Renewable energy in kWh? (e.g., 10)', type: 'number' },
+            { key: 'HVACUsage', question: 'Almost done! Is HVAC On or Off?', type: 'text', options: ['On', 'Off'] },
+            { key: 'LightingUsage', question: 'Great! Is lighting On or Off?', type: 'text', options: ['On', 'Off'] },
+            { key: 'Holiday', question: 'Last question! Is today a holiday? (Yes/No)', type: 'text', options: ['Yes', 'No'] }
+        ];
+        
+        function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+        function resetAccumulatedParams() {
+    accumulatedParams = {};
+    console.log('🔄 Accumulated parameters reset');
+}
+function resetChatState() {
+    chatState = {
+        mode: 'conversation',
+        collectingData: false,
+        step: 0,
+        data: {}
+    };
+    console.log('🔄 Chat state reset');
+}
+
+    function extractParametersFromText(text, useAccumulated = true) {
+    const params = useAccumulated ? {...accumulatedParams} : {};
+    const textLower = text.toLowerCase();
+    
+    // Temperature
+    const temp = textLower.match(/temperature\s*:?\s*(\d+\.?\d*)/i);
+    if (temp) params.Temperature = parseFloat(temp[1]);
+    
+    // Humidity
+    const humidity = textLower.match(/humidity\s*:?\s*(\d+\.?\d*)/i);
+    if (humidity) params.Humidity = parseFloat(humidity[1]);
+    
+    // Square Footage
+    const sqft = textLower.match(/square\s*footage\s*:?\s*(\d+)/i);
+    if (sqft) params.SquareFootage = parseInt(sqft[1]);
+    
+    // Occupancy
+    const occ = textLower.match(/occupancy\s*:?\s*(\d+)/i);
+    if (occ) params.Occupancy = parseInt(occ[1]);
+    
+    // Renewable Energy
+    const renewable = textLower.match(/renewable\s*energy\s*:?\s*(\d+\.?\d*)/i);
+    if (renewable) params.RenewableEnergy = parseFloat(renewable[1]);
+    
+    // HVAC
+    if (textLower.includes('hvac')) {
+        if (textLower.includes('on')) {
+            params.HVACUsage = 'On';
+        } else if (textLower.includes('off')) {
+            params.HVACUsage = 'Off';
+        }
+    }
+    
+    // Lighting/Lightning
+    if (textLower.includes('lighting') || textLower.includes('lightning')) {
+        if (textLower.includes('on')) {
+            params.LightingUsage = 'On';
+        } else if (textLower.includes('off')) {
+            params.LightingUsage = 'Off';
+        }
+    }
+    
+    // Holiday
+    if (textLower.includes('holiday')) {
+        if (textLower.includes('yes')) {
+            params.Holiday = 'Yes';
+        } else if (textLower.includes('no')) {
+            params.Holiday = 'No';
+        }
+    }
+    
+    // Date/Time
+    const dateMatch = text.match(/(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{2})/);
+    if (dateMatch) {
+        const [_, day, month, year, hour, minute] = dateMatch;
+        params.timestamp = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}T${hour.padStart(2,'0')}:${minute}`;
+    } else if (!params.timestamp) {
+        params.timestamp = new Date().toISOString().slice(0, 16);
+    }
+    
+    // Store accumulated params
+    if (useAccumulated) {
+        accumulatedParams = {...params};
+    }
+    
+    // Check if ALL 8 required parameters are present
+    const required = ['Temperature', 'Humidity', 'SquareFootage', 'Occupancy', 
+                     'RenewableEnergy', 'HVACUsage', 'LightingUsage', 'Holiday'];
+    
+    const allPresent = required.every(p => params[p] !== undefined && params[p] !== null);
+    const missing = required.filter(p => params[p] === undefined || params[p] === null);
+    
+    console.log('📊 Parameters:', params);
+    console.log(allPresent ? '✅ Complete!' : `⚠️ Missing: ${missing.join(', ')}`);
+    
+    if (allPresent) {
+        accumulatedParams = {};
+        return { complete: true, params: params, missing: [] };
+    } else {
+        return { complete: false, params: params, missing: missing };
+    }
+}
+
+async function initializeChatHistory() {
+    console.log("📚 Loading chat history...");
+    try {
+        const response = await authenticatedFetch('/api/chat-history');
+        const data = await response.json();
+        
+        if (data.success && data.chat_history.length > 0) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Clear existing messages except system message
+            const messages = messagesContainer.querySelectorAll('.message');
+            messages.forEach(msg => {
+                if (!msg.textContent.includes("Hello! I'm your Smart Energy")) {
+                    msg.remove();
+                }
+            });
+            
+            // Load previous messages
+            data.chat_history.forEach(msg => {
+                displayHistoricalMessage(msg.role, msg.content);
+            });
+            
+            console.log(`✅ Loaded ${data.chat_history.length} messages from history`);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    } catch (error) {
+        console.error("Error loading chat history:", error);
+    }
+}
+
+async function clearChatHistory() {
+    // Add confirmation dialog
+    if (!confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await authenticatedFetch('/api/clear-chat-history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Clear messages from UI
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = `
+                <div class="message bot">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">Hello! I'm your Smart Energy AI Assistant. Chat history cleared. I'm ready for a fresh conversation!</div>
+                </div>
+            `;
+            
+            // Reset chat state
+            resetChatState();
+            resetAccumulatedParams();
+            
+            showNotification('✅ Chat history cleared!', 'success');
+        } else {
+            showNotification('❌ Failed to clear chat', 'error');
+        }
+    } catch (error) {
+        console.error('Error clearing chat:', error);
+        showNotification('❌ Error clearing chat: ' + error.message, 'error');
+    }
+}
+
+// Display historical messages in chat
+function displayHistoricalMessage(role, content) {
+    const messagesContainer = document.getElementById('chatMessages');
+    
+    if (role === 'user') {
+        messagesContainer.innerHTML += `
+            <div class="message user">
+                <div class="message-content">${escapeHtml(content)}</div>
+                <div class="message-avatar"><i class="fas fa-user"></i></div>
+            </div>
+        `;
+    } else {
+        messagesContainer.innerHTML += `
+            <div class="message bot">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">${content}</div>
+            </div>
+        `;
+    }
+}
+
+
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    const messagesContainer = document.getElementById('chatMessages');
+    
+    // Display user message
+    messagesContainer.innerHTML += `
+        <div class="message user">
+            <div class="message-content">${escapeHtml(message)}</div>
+            <div class="message-avatar"><i class="fas fa-user"></i></div>
+        </div>
+    `;
+    
+    input.value = '';
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    const messageLower = message.toLowerCase();
+    
+    // ============================================================
+    // SCENARIO 1: User says "predict energy" or similar
+    // ============================================================
+    if ((messageLower.includes('predict') || messageLower.includes('calculate')) && 
+        !chatState.collectingData &&
+        !messageLower.match(/\d/)) {  // No numbers = just asking
+        
+        console.log('📝 Scenario 1: Starting step-by-step collection');
+        startStepByStepCollection();
+        return;
+    }
+    
+    // ============================================================
+    // SCENARIO 2 & 3: User provides parameters (complete or partial)
+    // ============================================================
+    if (!chatState.collectingData) {
+        // Check if message contains parameter data
+        const extraction = extractParametersFromText(message, true);
+        
+        if (extraction.complete) {
+            // SCENARIO 2: All parameters provided at once
+            console.log('✅ Scenario 2: All parameters complete - predicting');
+            await makePredictionFromParams(extraction.params);
+            return;
+        } else if (Object.keys(extraction.params).length > 1) {
+            // SCENARIO 3: Partial parameters - ask for missing
+            console.log('⚠️ Scenario 3: Partial parameters - asking for missing');
+            askForMissingParameters(extraction.missing);
+            return;
+        }
+    }
+    
+    // ============================================================
+    // STEP-BY-STEP MODE: Collecting parameters one by one
+    // ============================================================
+    if (chatState.collectingData) {
+        handleStepByStepInput(message);
+        return;
+    }
+    
+    // ============================================================
+    // DEFAULT: General conversation
+    // ============================================================
+    console.log('💬 Sending to AI with conversation history');
+    sendToAI(message);
+}
+
+function startStepByStepCollection() {
+    chatState.mode = 'step_by_step';
+    chatState.collectingData = true;
+    chatState.step = 0;
+    chatState.data = {};
+    resetAccumulatedParams();
+    
+    const messagesContainer = document.getElementById('chatMessages');
+    messagesContainer.innerHTML += `
+        <div class="message bot">
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content">${predictionSteps[0].question}</div>
+        </div>
+    `;
+    
+    speak(predictionSteps[0].question);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function handleStepByStepInput(message) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const currentStep = predictionSteps[chatState.step];
+    
+    if (currentStep.type === 'number') {
+        const value = parseFloat(message);
+        if (!isNaN(value)) {
+            chatState.data[currentStep.key] = value;
+            chatState.step++;
+            
+            if (chatState.step < predictionSteps.length) {
+                messagesContainer.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                        <div class="message-content">${predictionSteps[chatState.step].question}</div>
+                    </div>
+                `;
+                speak(predictionSteps[chatState.step].question);
+            } else {
+                makePredictionFromStepByStep();
+            }
+        } else {
+            messagesContainer.innerHTML += `
+                <div class="message bot">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">Please enter a valid number. ${currentStep.question}</div>
+                </div>
+            `;
+            speak('Please enter a valid number.');
+        }
+    } else {
+        const found = currentStep.options.find(opt => 
+            message.toLowerCase().includes(opt.toLowerCase())
+        );
+        
+        if (found) {
+            chatState.data[currentStep.key] = found;
+            chatState.step++;
+            
+            if (chatState.step < predictionSteps.length) {
+                messagesContainer.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                        <div class="message-content">${predictionSteps[chatState.step].question}</div>
+                    </div>
+                `;
+                speak(predictionSteps[chatState.step].question);
+            } else {
+                makePredictionFromStepByStep();
+            }
+        } else {
+            messagesContainer.innerHTML += `
+                <div class="message bot">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">Please answer: ${currentStep.options.join(' or ')}.</div>
+                </div>
+            `;
+            speak('Please answer: ' + currentStep.options.join(' or '));
+        }
+    }
+    
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+async function makePredictionFromStepByStep() {
+    chatState.data.timestamp = new Date().toISOString().slice(0, 16);
+    await makePredictionFromParams(chatState.data);
+    resetChatState();
+}
+
+// ==================== SCENARIO 3: ASK FOR MISSING PARAMETERS ====================
+
+function askForMissingParameters(missing) {
+    const messagesContainer = document.getElementById('chatMessages');
+    
+    const missingList = missing.map(m => {
+        switch(m) {
+            case 'Temperature': return 'Temperature (°C)';
+            case 'Humidity': return 'Humidity (%)';
+            case 'SquareFootage': return 'Square Footage';
+            case 'Occupancy': return 'Occupancy (number of people)';
+            case 'RenewableEnergy': return 'Renewable Energy (kWh)';
+            case 'HVACUsage': return 'HVAC Usage (On/Off)';
+            case 'LightingUsage': return 'Lighting Usage (On/Off)';
+            case 'Holiday': return 'Holiday (Yes/No)';
+            default: return m;
+        }
+    }).join(', ');
+    
+    const responseText = `I have most of the information! I still need: ${missingList}. Please provide the missing values.`;
+    
+    messagesContainer.innerHTML += `
+        <div class="message bot">
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content">${responseText}</div>
+        </div>
+    `;
+    
+    speak(responseText);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// ==================== MAKE PREDICTION ====================
+
+async function makePredictionFromParams(params) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const loadingId = 'loading-pred-' + Date.now();
+    
+    messagesContainer.innerHTML += `
+        <div class="message bot" id="${loadingId}">
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content">
+                <div class="spinner"></div>
+                <span style="margin-left: 1rem;">Analyzing your parameters...</span>
+            </div>
+        </div>
+    `;
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    try {
+        const response = await authenticatedFetch('/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params)
+        });
+        
+        const result = await response.json();
+        
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.remove();
+        
+        if (result.success || result.prediction) {
+    displayPredictionResult(result);
+    resetAccumulatedParams();
+    resetChatState();
+    
+    // ✅ Auto-refresh user profile stats IMMEDIATELY
+    console.log('✅ Chat prediction successful - refreshing profile');
+    loadUserProfile();  // Call immediately!
+    
+    // If dashboard is open, refresh it too
+    const dashboardTab = document.getElementById('dashboard');
+    if (dashboardTab && dashboardTab.classList.contains('active')) {
+        loadDashboardData();
+    }
+} else {
+            throw new Error(result.error || 'Prediction failed');
+        }
+        
+    } catch (error) {
+        console.error('Prediction error:', error);
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.remove();
+        
+        messagesContainer.innerHTML += `
+            <div class="message bot">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    ❌ Sorry, prediction failed: ${escapeHtml(error.message)}
+                </div>
+            </div>
+        `;
+    }
+    
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function displayPredictionResult(result) {
+    const messagesContainer = document.getElementById('chatMessages');
+    
+    let recsHTML = '';
+    if (result.recommendations && result.recommendations.length > 0) {
+        recsHTML = `
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,240,255,0.05); border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
+                <strong style="color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
+                    <i class="fas fa-lightbulb"></i> Recommendations:
+                </strong>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    ${result.recommendations.map(r => `<li style="margin: 0.5rem 0; color: rgba(255,255,255,0.9);">${escapeHtml(r)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    messagesContainer.innerHTML += `
+        <div class="message bot">
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content">
+                <strong style="font-size: 1.1rem; color: var(--primary); display: block; margin-bottom: 1rem;">
+                    ⚡ Energy Prediction Results
+                </strong>
+                
+                <div style="margin: 1rem 0; padding: 1.5rem; background: rgba(131,56,236,0.1); border-radius: 12px; border: 1px solid rgba(131,56,236,0.3); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 900; color: var(--primary);">
+                        ${result.prediction} kWh
+                    </div>
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                        Predicted Energy Consumption
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin: 1rem 0;">
+                    <div style="padding: 0.8rem; background: rgba(0,240,255,0.05); border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Usage Level</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: ${result.usage_level === 'High' ? 'var(--secondary)' : 'var(--success)'};">
+                            ${result.usage_level}
+                        </div>
+                    </div>
+                    <div style="padding: 0.8rem; background: rgba(0,240,255,0.05); border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Efficiency</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--success);">
+                            ${result.efficiency_score}%
+                        </div>
+                    </div>
+                    <div style="padding: 0.8rem; background: rgba(0,240,255,0.05); border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Peak Hour</div>
+                        <div style="font-size: 1.2rem; font-weight: 700;">
+                            ${result.peak_hour ? 'Yes' : 'No'}
+                        </div>
+                    </div>
+                    <div style="padding: 0.8rem; background: rgba(0,240,255,0.05); border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Comfort Index</div>
+                        <div style="font-size: 1.2rem; font-weight: 700;">
+                            ${result.comfort_index}
+                        </div>
+                    </div>
+                </div>
+                
+                ${recsHTML}
+                
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: rgba(255,255,255,0.6); text-align: center;">
+                    Want another prediction? Just provide the parameters!
+                </div>
+            </div>
+        </div>
+    `;
+    
+    speak(`Your predicted energy consumption is ${result.prediction} kilowatt hours. Usage level is ${result.usage_level}.`);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+function sendToAI(message) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const loadingId = 'loading-ai-' + Date.now();
+    
+    messagesContainer.innerHTML += `
+        <div class="message bot" id="${loadingId}">
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content"><div class="spinner"></div></div>
+        </div>
+    `;
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    authenticatedFetch('/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.remove();
+        
+        const poweredBy = data.powered_by === 'groq' ? 
+            '<br><br><span style="font-size: 0.75em; opacity: 0.6;">⚡ Powered by Groq AI</span>' :
+            data.powered_by === 'gemini' ? 
+            '<br><br><span style="font-size: 0.75em; opacity: 0.6;">✨ Powered by Gemini AI</span>' :
+            '<br><br><span style="font-size: 0.75em; opacity: 0.6;">🛡️ Rule-based</span>';
+        
+        messagesContainer.innerHTML += `
+            <div class="message bot">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">${data.response}${poweredBy}</div>
+            </div>
+        `;
+        
+        speak(data.response);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    })
+    .catch(error => {
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.remove();
+        
+        messagesContainer.innerHTML += `
+            <div class="message bot">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">Sorry, I encountered an error: ${escapeHtml(error.message)}. Please try again!</div>
+            </div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+}
+
+document.getElementById('chatInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+        // Tab navigation
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            // Find and activate the corresponding nav button
+            const navButtons = document.querySelectorAll('.nav-tab');
+            navButtons.forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(tabName) || 
+                    btn.onclick.toString().includes(tabName)) {
+                    btn.classList.add('active');
+                }
+            });
+            if (tabName === 'chat') {
+        setTimeout(() => {
+            initializeChatHistory();  // NEW: Load previous messages
+        }, 100);
+    }
+            if (tabName === 'dashboard') setTimeout(initCharts, 100);
+            if (tabName === 'reviews') loadReviews();
+        }
+        
+        // Prediction Form
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                timestamp: document.getElementById('timestamp').value,
+                Temperature: parseFloat(document.getElementById('temperature').value),
+                Humidity: parseFloat(document.getElementById('humidity').value),
+                SquareFootage: parseInt(document.getElementById('squareFootage').value),
+                Occupancy: parseInt(document.getElementById('occupancy').value),
+                RenewableEnergy: parseFloat(document.getElementById('renewableEnergy').value),
+                HVACUsage: document.getElementById('hvacUsage').value,
+                LightingUsage: document.getElementById('lightingUsage').value,
+                Holiday: document.getElementById('holiday').value
+            };
+            
+            const resultsCard = document.getElementById('resultsCard');
+            resultsCard.innerHTML = '<div class="spinner"></div>';
+            
+            try {
+                const response = await authenticatedFetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+    displayResults(result);
+    
+    // Auto-refresh user profile stats IMMEDIATELY
+    console.log('✅ Prediction successful - refreshing profile');
+    loadUserProfile();  // Refresh profile immediately
+    
+    // If dashboard is open, refresh it too
+    const dashboardTab = document.getElementById('dashboard');
+    if (dashboardTab && dashboardTab.classList.contains('active')) {
+        loadDashboardData();
+    }
+}else {
+    resultsCard.innerHTML = `<div class="error-message">Error: ${result.error || 'Unknown error occurred'}</div>`;
+}
+            } catch (error) {
+                resultsCard.innerHTML = `<div class="error-message">Error: ${error.message}. Make sure the server is running!</div>`;
+            }
+        });
+        
+        function displayResults(result) {
+            const resultsCard = document.getElementById('resultsCard');
+            const data = (typeof result.prediction === 'object') ? result.prediction : result;
+            
+            let recommendationsHTML = '';
+            if (data.recommendations && data.recommendations.length > 0) {
+                recommendationsHTML = `
+                    <div class="recommendations">
+                        <h4 style="color: var(--success); margin-bottom: 1rem;">💡 Recommendations</h4>
+                        ${data.recommendations.map(rec => `<div class="recommendation-item">${rec}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            resultsCard.innerHTML = `
+                <div class="result-value">${data.prediction}</div>
+                <div class="result-label">kWh Predicted Consumption</div>
+                <div class="result-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value">${data.usage_level}</div>
+                        <div class="metric-label">Usage Level</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${data.efficiency_score}%</div>
+                        <div class="metric-label">Efficiency Score</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${data.peak_hour ? 'Yes' : 'No'}</div>
+                        <div class="metric-label">Peak Hour</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${data.comfort_index}</div>
+                        <div class="metric-label">Comfort Index</div>
+                    </div>
+                </div>
+                ${recommendationsHTML}
+            `;
+        }
+        
+        // File Upload Methods
+        function switchMethod(method) {
+            const manualBtn = document.getElementById('manualMethodBtn');
+            const fileBtn = document.getElementById('fileMethodBtn');
+            const manualSection = document.getElementById('manualFormSection');
+            const fileSection = document.getElementById('fileUploadSection');
+            const resultsCard = document.getElementById('resultsCard');
+            
+            if (method === 'manual') {
+                manualBtn.classList.add('active');
+                fileBtn.classList.remove('active');
+                manualSection.style.display = 'block';
+                fileSection.style.display = 'none';
+            } else {
+                fileBtn.classList.add('active');
+                manualBtn.classList.remove('active');
+                manualSection.style.display = 'none';
+                fileSection.style.display = 'block';
+                
+                document.getElementById('predictionForm').reset();
+                document.getElementById('dataFile').value = '';
+                document.getElementById('fileName').textContent = '';
+                
+                resultsCard.innerHTML = `
+                    <i class="fas fa-chart-line" style="font-size: 4rem; color: rgba(0, 240, 255, 0.3); margin-bottom: 1rem;"></i>
+                    <p class="results-placeholder">Your prediction results will appear here</p>
+                `;
+            }
+        }
+        
+        document.getElementById('dataFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '';
+            document.getElementById('fileName').textContent = fileName ? `✓ Selected: ${fileName}` : '';
+        });
+        
+        async function uploadAndExtract() {
+            const fileInput = document.getElementById('dataFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('⚠️ Please select a file first');
+                return;
+            }
+            
+            const loadingDiv = document.getElementById('uploadLoading');
+            const resultsCard = document.getElementById('resultsCard');
+            loadingDiv.style.display = 'block';
+            resultsCard.innerHTML = '<div class="spinner"></div><p class="results-placeholder">Processing your file...</p>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await authenticatedFetch('/api/extract-from-file', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                
+                if (result.success) {
+                    const manualSection = document.getElementById('manualFormSection');
+                    const fileSection = document.getElementById('fileUploadSection');
+                    
+                    fileSection.style.display = 'none';
+                    manualSection.style.display = 'block';
+                    
+                    document.getElementById('timestamp').value = result.data.timestamp || '';
+                    document.getElementById('temperature').value = result.data.Temperature || '';
+                    document.getElementById('humidity').value = result.data.Humidity || '';
+                    document.getElementById('squareFootage').value = result.data.SquareFootage || '';
+                    document.getElementById('occupancy').value = result.data.Occupancy || '';
+                    document.getElementById('renewableEnergy').value = result.data.RenewableEnergy || '';
+                    document.getElementById('hvacUsage').value = result.data.HVACUsage || '';
+                    document.getElementById('lightingUsage').value = result.data.LightingUsage || '';
+                    document.getElementById('holiday').value = result.data.Holiday || '';
+                    
+                    if (result.prediction) {
+                        displayResults(result.prediction);
+                        
+                        // ✅ NEW: Auto-refresh profile after file upload prediction
+                        console.log('✅ File upload prediction successful - refreshing profile');
+                        loadUserProfile();
+                        
+                        // If dashboard is open, refresh it too
+                        const dashboardTab = document.getElementById('dashboard');
+                        if (dashboardTab && dashboardTab.classList.contains('active')) {
+                            loadDashboardData();
+                        }
+                    } else {
+                        resultsCard.innerHTML = `
+                            <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: 1rem;"></i>
+                            <p style="color: var(--success); font-size: 1.2rem; font-weight: 600;">Data Extracted!</p>
+                            <p class="results-placeholder">Click "Predict" to generate energy forecast.</p>
+                        `;
+                    }
+                    
+                    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    const errorMsg = result.error || 'Failed to extract data from file';
+                    resultsCard.innerHTML = `
+                        <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: var(--secondary); margin-bottom: 1rem;"></i>
+                        <div class="error-message">${errorMsg}</div>
+                        <p class="results-placeholder" style="margin-top: 1rem;">Check server console for details</p>
+                    `;
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultsCard.innerHTML = `
+                    <i class="fas fa-times-circle" style="font-size: 4rem; color: var(--secondary); margin-bottom: 1rem;"></i>
+                    <div class="error-message">Error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        
+        
+        
+        function startPredictionFlow() {
+            chatState.collectingData = true;
+            chatState.step = 0;
+            chatState.data = {};
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML += `
+                <div class="message bot">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">${predictionSteps[0].question}</div>
+                </div>
+            `;
+            
+            speak(predictionSteps[0].question);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function handlePredictionStep(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const currentStep = predictionSteps[chatState.step];
+            
+            if (currentStep.type === 'number') {
+                const value = parseFloat(message);
+                if (!isNaN(value)) {
+                    chatState.data[currentStep.key] = value;
+                    chatState.step++;
+                    
+                    if (chatState.step < predictionSteps.length) {
+                        messagesContainer.innerHTML += `
+                            <div class="message bot">
+                                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                                <div class="message-content">${predictionSteps[chatState.step].question}</div>
+                            </div>
+                        `;
+                        speak(predictionSteps[chatState.step].question);
+                    } else {
+                        makeChatbotPrediction();
+                    }
+                } else {
+                    messagesContainer.innerHTML += `
+                        <div class="message bot">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">Please enter a valid number. ${currentStep.question}</div>
+                        </div>
+                    `;
+                    speak('Please enter a valid number. ' + currentStep.question);
+                }
+            } else {
+                const found = currentStep.options.find(opt => 
+                    message.toLowerCase().includes(opt.toLowerCase())
+                );
+                
+                if (found) {
+                    chatState.data[currentStep.key] = found;
+                    chatState.step++;
+                    
+                    if (chatState.step < predictionSteps.length) {
+                        messagesContainer.innerHTML += `
+                            <div class="message bot">
+                                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                                <div class="message-content">${predictionSteps[chatState.step].question}</div>
+                            </div>
+                        `;
+                        speak(predictionSteps[chatState.step].question);
+                    } else {
+                        makeChatbotPrediction();
+                    }
+                } else {
+                    messagesContainer.innerHTML += `
+                        <div class="message bot">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">Please answer: ${currentStep.options.join(' or ')}. ${currentStep.question}</div>
+                        </div>
+                    `;
+                    speak('Please answer: ' + currentStep.options.join(' or ') + '. ' + currentStep.question);
+                }
+            }
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        async function makeChatbotPrediction() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const loadingId = 'loading-' + Date.now();
+            
+            messagesContainer.innerHTML += `
+                <div class="message bot" id="${loadingId}">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">Calculating your energy prediction... <div class="spinner"></div></div>
+                </div>
+            `;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            chatState.data.timestamp = new Date().toISOString().slice(0, 16);
+            
+            try {
+                const response = await authenticatedFetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(chatState.data)
+                });
+                
+                const result = await response.json();
+                
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) loadingElement.remove();
+                
+                if (result.success) {
+                    let recText = result.recommendations && result.recommendations.length > 0
+                        ? '<br><br><strong>💡 Recommendations:</strong><br>' + 
+                          result.recommendations.map(r => '• ' + r).join('<br>')
+                        : '';
+                    
+                    messagesContainer.innerHTML += `
+                        <div class="message bot">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">
+                                <strong>⚡ Your Energy Prediction:</strong><br><br>
+                                <strong style="font-size: 1.5em; color: var(--primary);">${result.prediction} kWh</strong><br><br>
+                                📊 <strong>Usage Level:</strong> ${result.usage_level}<br>
+                                ⚙️ <strong>Efficiency Score:</strong> ${result.efficiency_score}%<br>
+                                ⏰ <strong>Peak Hour:</strong> ${result.peak_hour ? 'Yes' : 'No'}
+                                ${recText}<br><br>
+                                Want another prediction? Just ask!
+                            </div>
+                        </div>
+                    `;
+                    
+                    const predictionText = `Your energy prediction is ${result.prediction} kilowatt hours. Usage level is ${result.usage_level}. Efficiency score is ${result.efficiency_score} percent.`;
+                    speak(predictionText);
+                } else {
+                    messagesContainer.innerHTML += `
+                        <div class="message bot">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">Sorry, there was an error making the prediction. Please try again!</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) loadingElement.remove();
+                
+                messagesContainer.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                        <div class="message-content">Error: ${error.message}. Please try again!</div>
+                    </div>
+                `;
+            }
+            
+            chatState = { mode: 'conversation', collectingData: false, step: 0, data: {} };
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Speech Recognition and TTS
+        let recognition = null;
+        let isListening = false;
+        let autoSpeak = true;
+        
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    document.getElementById('micButton').classList.add('active');
+                    document.getElementById('micIcon').classList.remove('fa-microphone');
+                    document.getElementById('micIcon').classList.add('fa-stop');
+                    showVoiceIndicator('Listening...');
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('chatInput').value = transcript;
+                    hideVoiceIndicator();
+                };
+                
+                recognition.onerror = function(event) {
+                    isListening = false;
+                    document.getElementById('micButton').classList.remove('active');
+                    document.getElementById('micIcon').classList.remove('fa-stop');
+                    document.getElementById('micIcon').classList.add('fa-microphone');
+                    hideVoiceIndicator();
+                };
+                
+                recognition.onend = function() {
+                    isListening = false;
+                    document.getElementById('micButton').classList.remove('active');
+                    document.getElementById('micIcon').classList.remove('fa-stop');
+                    document.getElementById('micIcon').classList.add('fa-microphone');
+                    hideVoiceIndicator();
+                };
+            }
+        }
+        
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+            
+            if (!recognition) {
+                alert('Speech recognition is not supported in your browser.');
+                return;
+            }
+            
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+        
+        function showVoiceIndicator(text) {
+            let indicator = document.querySelector('.voice-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'voice-indicator';
+                document.querySelector('.chat-input-container').appendChild(indicator);
+            }
+            indicator.textContent = text;
+            indicator.style.display = 'block';
+        }
+        
+        function hideVoiceIndicator() {
+            const indicator = document.querySelector('.voice-indicator');
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+        
+        function speak(text) {
+            if (!autoSpeak) return;
+            
+            window.speechSynthesis.cancel();
+            
+            const cleanText = text
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/[⚡📊⚙️⏰💡•✨]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            if (!cleanText) return;
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+            
+            utterance.onstart = function() {
+                document.getElementById('speakerButton').classList.add('speaking');
+            };
+            
+            utterance.onend = function() {
+                document.getElementById('speakerButton').classList.remove('speaking');
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        function toggleAutoSpeak() {
+            autoSpeak = !autoSpeak;
+            const speakerButton = document.getElementById('speakerButton');
+            const speakerIcon = document.getElementById('speakerIcon');
+            
+            if (autoSpeak) {
+                speakerButton.style.background = 'rgba(0, 240, 255, 0.1)';
+                speakerButton.style.borderColor = 'var(--primary)';
+                speakerIcon.classList.remove('fa-volume-mute');
+                speakerIcon.classList.add('fa-volume-up');
+                speak('Auto-speak enabled');
+            } else {
+                speakerButton.style.background = 'rgba(255, 0, 0, 0.1)';
+                speakerButton.style.borderColor = '#ff4444';
+                speakerIcon.classList.remove('fa-volume-up');
+                speakerIcon.classList.add('fa-volume-mute');
+                window.speechSynthesis.cancel();
+            }
+        }
+        
+        setTimeout(initSpeechRecognition, 500);
+        
+        // Reviews
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.dataset.rating);
+                document.querySelectorAll('.star').forEach((s, index) => {
+                    s.classList.toggle('active', index < currentRating);
+                });
+            });
+        });
+        
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        // Get the name from the input field
+        const reviewName = document.getElementById('reviewName').value.trim();
+        
+        if (!reviewName) {
+            alert('Please enter your name');
+            return;
+        }
+        
+        const response = await authenticatedFetch('/api/submit-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: reviewName,
+                rating: currentRating,
+                comment: document.getElementById('reviewComment').value
+            })
+        });
+        const result = await response.json();
+        if (result.success) {
+            alert('Thank you for your review!');
+            document.getElementById('reviewForm').reset();
+            
+            // Reset stars to 5
+            currentRating = 5;
+            document.querySelectorAll('.star').forEach((s, index) => {
+                s.classList.toggle('active', index < 5);
+            });
+            
+            loadReviews();
+        } else {
+            alert('Error: ' + (result.error || 'Failed to submit review'));
+        }
+    } catch (error) {
+        console.error('Review submission error:', error);
+        alert('Error: ' + error.message);
+    }
+});
+        
+        async function loadReviews() {
+            try {
+                const response = await authenticatedFetch('/api/get-reviews');
+                const result = await response.json();
+                if (result.success && result.reviews.length > 0) {
+                   document.getElementById('reviewsList').innerHTML = result.reviews.reverse().map(review => `
+    <div class="review-card">
+        <div class="review-header">
+            <span class="review-author">${review.user_name || review.name || 'Anonymous'}</span>
+                                <span class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+                            </div>
+                            <p>${review.comment}</p>
+                            <small style="color: rgba(255, 255, 255, 0.4);">${review.timestamp}</small>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        }
+        
+        // Dashboard Charts
+        function initCharts() {
+            authenticatedFetch('/api/charts-data')
+                .then(response => response.json())
+                .then(data => {
+                    new Chart(document.getElementById('trendChart'), {
+                        type: 'line',
+                        data: {
+                            labels: data.energy_trend.labels,
+                            datasets: [{
+                                label: 'Energy (kWh)',
+                                data: data.energy_trend.data,
+                                borderColor: '#00f0ff',
+                                backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { labels: { color: '#f0f4f8' } } },
+                            scales: {
+                                y: { ticks: { color: '#f0f4f8' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                                x: { ticks: { color: '#f0f4f8' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+                            }
+                        }
+                    });
+                    
+                    new Chart(document.getElementById('deviceChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.device_breakdown.labels,
+                            datasets: [{ data: data.device_breakdown.data, backgroundColor: ['#00f0ff', '#8338ec', '#ff006e', '#06ffa5'] }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { labels: { color: '#f0f4f8' } } }
+                        }
+                    });
+                    
+                    new Chart(document.getElementById('tempChart'), {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: 'Temp vs Energy',
+                                data: data.temperature_correlation.temperature.map((temp, i) => ({ x: temp, y: data.temperature_correlation.energy[i] })),
+                                backgroundColor: '#ff006e'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { labels: { color: '#f0f4f8' } } },
+                            scales: {
+                                y: { title: { display: true, text: 'Energy', color: '#f0f4f8' }, ticks: { color: '#f0f4f8' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                                x: { title: { display: true, text: 'Temperature', color: '#f0f4f8' }, ticks: { color: '#f0f4f8' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+                            }
+                        }
+                    });
+                    
+                    new Chart(document.getElementById('occupancyChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: data.occupancy_impact.occupancy,
+                            datasets: [{ label: 'Energy by Occupancy', data: data.occupancy_impact.energy, backgroundColor: '#8338ec' }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { labels: { color: '#f0f4f8' } } },
+                            scales: {
+                                y: { ticks: { color: '#f0f4f8' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                                x: { ticks: { color: '#f0f4f8' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+                            }
+                        }
+                    });
+                });
+        }
+        
+        // Set default datetime
+        document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+// ==================== USER PROFILE FUNCTIONS ====================
+
+let userProfileData = null;
+
+async function loadUserProfile() {
+    try {
+        const response = await authenticatedFetch('/api/user-profile');
+        const data = await response.json();
+        
+        if (data.success) {
+            userProfileData = data;
+            
+            // Update navbar
+            const initials = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('userName').textContent = data.name;
+            
+            // Update dropdown
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileName').textContent = data.name;
+            document.getElementById('profileEmail').textContent = data.email;
+            
+            // Format member since date
+            try {
+                const memberDate = new Date(data.member_since);
+                const formattedDate = memberDate.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short' 
+                });
+                document.getElementById('memberSince').textContent = formattedDate;
+            } catch(e) {
+                document.getElementById('memberSince').textContent = 'N/A';
+            }
+            
+            // Update stats
+            document.getElementById('totalPredictions').textContent = data.total_predictions;
+            document.getElementById('avgConsumption').textContent = `${data.avg_consumption} kWh`;
+            document.getElementById('avgEfficiency').textContent = `${data.avg_efficiency}%`;
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('active');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const profile = document.querySelector('.user-profile');
+    const dropdown = document.getElementById('profileDropdown');
+    
+    if (profile && dropdown && !profile.contains(event.target)) {
+        dropdown.classList.remove('active');
+    }
+});
+
+// ==================== DASHBOARD FUNCTIONS ====================
+
+let consumptionChart = null;
+
+async function loadDashboardData() {
+    try {
+        const response = await authenticatedFetch('/api/dashboard-stats');
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update stat cards
+            document.getElementById('dashTotalPredictions').textContent = data.stats.total_predictions;
+            document.getElementById('dashAvgConsumption').textContent = data.stats.avg_consumption;
+            document.getElementById('dashAvgEfficiency').textContent = data.stats.avg_efficiency;
+            document.getElementById('dashHighUsage').textContent = data.stats.high_usage_count;
+            
+            // Update high usage percentage
+            const highPercent = data.stats.total_predictions > 0 
+                ? Math.round((data.stats.high_usage_count / data.stats.total_predictions) * 100)
+                : 0;
+            document.getElementById('dashHighUsagePercent').innerHTML = `<span>${highPercent}% of total</span>`;
+            
+            // Update trend indicator
+            const trendEl = document.getElementById('dashConsumptionTrend');
+            const predictionChangeEl = document.getElementById('dashPredictionChange');
+if (data.stats.total_predictions > 0) {
+    predictionChangeEl.className = 'stat-change neutral';
+    predictionChangeEl.innerHTML = '<i class="fas fa-chart-line"></i><span>Predictions made</span>';
+} else {
+    predictionChangeEl.className = 'stat-change neutral';
+    predictionChangeEl.innerHTML = '<i class="fas fa-minus"></i><span>No data yet</span>';
+}
+            
+            // Update consumption trend chart
+            updateConsumptionChart(data.consumption_trend);
+            
+            // Load prediction history
+            loadPredictionHistory();
+        }
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
+
+function updateConsumptionChart(trendData) {
+    const ctx = document.getElementById('consumptionTrendChart');
+    
+    if (!ctx || !ctx.getContext) {
+        console.warn('Chart canvas not ready yet');
+        return;
+    }
+    
+    if (!trendData || trendData.length === 0) {
+        return;
+    }
+    
+    // Destroy existing chart
+    if (consumptionChart) {
+        consumptionChart.destroy();
+    }
+    
+    const labels = trendData.map(item => {
+        const date = new Date(item.date);
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+    });
+    
+    const values = trendData.map(item => item.consumption);
+    
+    consumptionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Energy Consumption (kWh)',
+                data: values,
+                borderColor: '#00f0ff',
+                backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#00f0ff',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#00f0ff',
+                    bodyColor: '#ffffff',
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.y} kWh`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { 
+                        color: '#f0f4f8',
+                        callback: function(value) {
+                            return value + ' kWh';
+                        }
+                    },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                },
+                x: {
+                    ticks: { 
+                        color: '#f0f4f8',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                }
+            }
+        }
+    });
+}
+
+async function loadPredictionHistory() {
+    try {
+        const response = await authenticatedFetch('/api/prediction-history');
+        const data = await response.json();
+        
+        if (data.success && data.predictions.length > 0) {
+            const container = document.getElementById('predictionHistoryContainer');
+            
+            let tableHTML = `
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Consumption</th>
+                            <th>Usage Level</th>
+                            <th>Efficiency</th>
+                            <th>Temperature</th>
+                            <th>Occupancy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.predictions.forEach(pred => {
+                const date = new Date(pred.date);
+                const formattedDate = date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                tableHTML += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td><strong style="color: var(--primary);">${pred.prediction} kWh</strong></td>
+                        <td><span class="usage-badge ${pred.usage_level.toLowerCase()}">${pred.usage_level}</span></td>
+                        <td>${pred.efficiency_score}%</td>
+                        <td>${pred.temperature || 'N/A'}°C</td>
+                        <td>${pred.occupancy || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+    } catch (error) {
+        console.error('Error loading history:', error);
+    }
+}
+
+// ==================== INITIALIZE ON PAGE LOAD ====================
+
+window.addEventListener('load', function() {
+    if (checkAuth()) {
+        loadUserProfile();
+        
+        // Set username from localStorage if available
+        const userName = localStorage.getItem('user_name');
+        if (userName) {
+            document.getElementById('userName').textContent = userName;
+        }
+        const chatTab = document.getElementById('chat');
+        if (chatTab && chatTab.classList.contains('active')) {
+            setTimeout(initializeChatHistory, 500);
+        }
+    }
+});
+
+// Update the existing showTab function
+const originalShowTab = typeof showTab !== 'undefined' ? showTab : null;
+
+if (originalShowTab) {
+    showTab = function(tabName) {
+        originalShowTab(tabName);
+        
+        if (tabName === 'dashboard') {
+            setTimeout(loadDashboardData, 100);
+        }
+    };
+} else {
+    // If showTab doesn't exist yet, it will be overridden when it's defined
+    console.warn('showTab function not found, will override when available');
+}
+
+// ==================== REPORT FUNCTIONS ====================
+
+async function downloadReport() {
+    const btn = document.getElementById('downloadReportBtn');
+    const originalText = btn.innerHTML;
+    
+    try {
+        // Show loading
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        btn.disabled = true;
+        
+        // Download report
+        const response = await authenticatedFetch('/api/download-report');
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to generate report');
+        }
+        
+        // Create blob and download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `energy_report_${new Date().toISOString().slice(0,10)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Show success message
+        showNotification('✅ Report downloaded successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Download error:', error);
+        showNotification('❌ ' + error.message, 'error');
+    } finally {
+        // Reset button
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+async function emailReport() {
+    const btn = document.getElementById('emailReportBtn');
+    const originalText = btn.innerHTML;
+    
+    try {
+        // Show loading
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        btn.disabled = true;
+        
+        // Send email
+        const response = await authenticatedFetch('/api/email-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('✅ Report sent to your email!', 'success');
+        } else {
+            throw new Error(result.error || 'Failed to send email');
+        }
+        
+    } catch (error) {
+        console.error('Email error:', error);
+        showNotification('❌ ' + error.message, 'error');
+    } finally {
+        // Reset button
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'success' ? 'rgba(6, 255, 165, 0.9)' : 'rgba(255, 0, 110, 0.9)'};
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+    </script>
+</body>
+</html>

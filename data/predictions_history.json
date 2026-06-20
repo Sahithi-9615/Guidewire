@@ -1,0 +1,46 @@
+{
+  "ksahithi9615@gmail.com": [
+    {
+      "timestamp": "2026-01-20T21:03:56.311272",
+      "prediction": 83.99,
+      "usage_level": "High",
+      "efficiency_score": 66.0,
+      "temperature": 29.2,
+      "occupancy": 6,
+      "hvac": "On",
+      "date": "2026-01-20 21:03:56"
+    },
+    {
+      "timestamp": "2026-01-20T21:04:53.114330",
+      "prediction": 85.84,
+      "usage_level": "High",
+      "efficiency_score": 64.2,
+      "temperature": 50,
+      "occupancy": 6,
+      "hvac": "On",
+      "date": "2026-01-20 21:04:53"
+    }
+  ],
+  "y22cs085s@gmail.com": [
+    {
+      "timestamp": "2026-01-20T21:06:08.726721",
+      "prediction": 85.52,
+      "usage_level": "High",
+      "efficiency_score": 64.5,
+      "temperature": 49.1,
+      "occupancy": 7,
+      "hvac": "On",
+      "date": "2026-01-20 21:06:08"
+    },
+    {
+      "timestamp": "2026-01-20T21:06:50.305523",
+      "prediction": 83.99,
+      "usage_level": "High",
+      "efficiency_score": 66.0,
+      "temperature": 29.2,
+      "occupancy": 6,
+      "hvac": "On",
+      "date": "2026-01-20 21:06:50"
+    }
+  ]
+}
